@@ -53,4 +53,14 @@ router.post("/newCustomer", async (req, res, next) => {
   }
 });
 
+router.delete("/:id/delete", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deletedCustomer = await CustomersData.remove(id);
+    return res.json({ message: "Customer deleted", deletedCustomer });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 module.exports = router;

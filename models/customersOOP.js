@@ -50,6 +50,14 @@ class CustomersData {
     );
     return results.rows[0];
   }
+
+  static async remove(id) {
+    const removeUser = await db.query(
+      "DELETE FROM Customers WHERE customer_id = $1 RETURNING *",
+      [id]
+    );
+    return removeUser.rows[0];
+  }
 }
 
 module.exports = CustomersData;
