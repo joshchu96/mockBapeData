@@ -38,6 +38,9 @@ class CustomersData {
   }
 
   static async create(customer_name, customer_email, other_customer_details) {
+    if (!customer_name || customer_email) {
+      throw new expressError("Missing required data", 404);
+    }
     const results = await db.query(
       `INSERT INTO Customers (customer_name, customer_email, other_customer_details)
         VALUES 
