@@ -1,37 +1,20 @@
 const router = require("express").Router();
 const db = require("./db");
 const expressError = require("./expressError");
+const CustomersData = require("./models/customersOOP");
 
 //GET: all customers info
 router.get("/all", async (req, res) => {
-  const customersResults = await db.query("SELECT * FROM Customers");
-  return res.json(customersResults.rows);
+  let results = await CustomersData.getAll();
+  res.json(results);
 });
 
 //GET: all orders a customer has bought.
 router.get("/:id/all-orders", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const customerRes = await db.query(
-      "SELECT c.customer_id, c.customer_name, c.customer_email, o.other_order_details, p.product_name FROM Customers AS c LEFT JOIN Orders AS o ON c.customer_id = o.customer_id LEFT JOIN Products as p ON o.product_id = p.product_id WHERE c.customer_id = $1",
-      [id]
-    );
-
-    if (customerRes.rows.length === 0) {
-      throw new expressError("Customer not found", 404);
-    }
-    const { customer_id, customer_name, customer_email } = customerRes.rows[0];
-    const orderedItems = customerRes.rows.map((r) => ({
-      product: r.product_name,
-      details: r.other_order_details,
-    }));
-
-    return res.json({
-      customer_id,
-      customer_name,
-      customer_email,
-      orderedItems,
-    });
+    const results = await CustomersData.getById(id);
+    res.json(results);
   } catch (error) {
     return next(error);
   }
@@ -51,6 +34,20 @@ router.patch("/:id/update_info", async (req, res, next) => {
     } else {
       res.json({ updated: updateRes.rows[0] });
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/newCustomer", async (req, res, next) => {
+  try {
+    const { customer_name, customer_email, other_customer_details } = req.body;
+    const newCustomer = await CustomersData.create(
+      customer_name,
+      customer_email,
+      other_customer_details
+    );
+    res.json(newCustomer);
   } catch (error) {
     next(error);
   }
